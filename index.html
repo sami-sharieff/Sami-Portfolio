@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mohammed Sami Ullah Sharieff - ServiceNow Administrator</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .gradient-text {
+            background: linear-gradient(to right, #2563eb, #0f172a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-link { position: relative; }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background-color: #2563eb;
+            transition: width 0.3s;
+        }
+        .nav-link:hover::after { width: 100%; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Icons (Inline SVGs for reliability) ---
+        const Icons = {
+            Mail: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>,
+            Phone: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
+            Linkedin: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>,
+            MapPin: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>,
+            ChevronDown: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>,
+            ExternalLink: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+            Code: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
+            Briefcase: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>,
+            GraduationCap: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
+            CheckCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+            Download: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>,
+            User: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+            Database: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>,
+            Layout: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
+        };
+
+        const App = () => {
+            const [isScrolled, setIsScrolled] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => setIsScrolled(window.scrollY > 20);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const scrollTo = (id) => {
+                document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col">
+                    
+                    {/* Navigation */}
+                    <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md shadow-sm py-4' : 'bg-transparent py-6'}`}>
+                        <div className="container mx-auto px-6 flex justify-between items-center">
+                            <h1 className={`text-xl font-bold tracking-tight ${isScrolled ? 'text-slate-900' : 'text-slate-800'}`}>
+                                Sami Sharieff<span className="text-blue-600">.</span>
+                            </h1>
+                            <div className="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
+                                <button onClick={() => scrollTo('about')} className="nav-link hover:text-blue-600 transition">About</button>
+                                <button onClick={() => scrollTo('skills')} className="nav-link hover:text-blue-600 transition">Skills</button>
+                                <button onClick={() => scrollTo('experience')} className="nav-link hover:text-blue-600 transition">Experience</button>
+                                <button onClick={() => scrollTo('projects')} className="nav-link hover:text-blue-600 transition">Projects</button>
+                                <button onClick={() => scrollTo('contact')} className="bg-blue-600 text-white px-5 py-2 rounded-full hover:bg-blue-700 transition shadow-md shadow-blue-600/20">Contact Me</button>
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Hero Section */}
+                    <header className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 overflow-hidden">
+                        <div className="absolute top-0 right-0 -z-10 opacity-10">
+                            <svg width="800" height="800" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                <path fill="#2563EB" d="M44.7,-76.4C58.9,-69.2,71.8,-59.1,81.6,-46.7C91.4,-34.3,98.1,-19.6,95.8,-4.9C93.5,9.8,82.2,24.5,70.9,37.3C59.6,50.1,48.3,60.9,35.6,67.6C22.9,74.3,8.8,76.9,-4.6,84.9C-18,92.9,-30.7,106.3,-41.5,106.2C-52.3,106.1,-61.2,92.5,-69.5,79.1C-77.8,65.7,-85.5,52.5,-89.2,38.8C-92.9,25.1,-92.6,10.9,-88.7,-2C-84.8,-14.9,-77.3,-26.5,-68.4,-37.2C-59.5,-47.9,-49.2,-57.7,-37.8,-66.2C-26.4,-74.7,-13.9,-81.9,0.3,-82.4C14.5,-82.9,29,-76.7,44.7,-76.4Z" transform="translate(100 100)" />
+                            </svg>
+                        </div>
+                        
+                        <div className="container mx-auto max-w-4xl text-center">
+                            <div className="inline-block px-3 py-1 mb-6 text-sm font-semibold text-blue-600 bg-blue-50 rounded-full border border-blue-100">
+                                ServiceNow System Administrator
+                            </div>
+                            <h1 className="text-5xl md:text-7xl font-bold text-slate-900 tracking-tight mb-6">
+                                Mohammed Sami <br/>
+                                <span className="gradient-text">Ullah Sharieff</span>
+                            </h1>
+                            <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+                                Transforming IT operations through workflow automation and ITSM excellence. 
+                                Specialized in creating efficient, reliable ServiceNow environments.
+                            </p>
+                            
+                            <div className="flex flex-col sm:flex-row justify-center gap-4">
+                                <button onClick={() => scrollTo('contact')} className="flex items-center justify-center gap-2 bg-slate-900 text-white px-8 py-3 rounded-lg font-medium hover:bg-slate-800 transition">
+                                    Get in Touch <Icons.Mail />
+                                </button>
+                                <a href="https://www.linkedin.com/in/sami-sharieff/" target="_blank" className="flex items-center justify-center gap-2 bg-white text-slate-700 border border-slate-200 px-8 py-3 rounded-lg font-medium hover:bg-slate-50 transition">
+                                    LinkedIn Profile <Icons.ExternalLink />
+                                </a>
+                            </div>
+
+                            <div className="mt-16 flex justify-center text-slate-400 animate-bounce cursor-pointer" onClick={() => scrollTo('about')}>
+                                <Icons.ChevronDown />
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* About Section */}
+                    <section id="about" className="py-20 bg-white">
+                        <div className="container mx-auto px-6 max-w-4xl">
+                            <h2 className="text-3xl font-bold text-slate-900 mb-8 flex items-center gap-3">
+                                <span className="p-2 bg-blue-100 text-blue-600 rounded-lg"><Icons.User /></span>
+                                Professional Summary
+                            </h2>
+                            <div className="prose prose-lg text-slate-600">
+                                <p className="mb-4">
+                                    I am a ServiceNow System Administrator with a solid foundation in IT Service Management (ITSM) and workflow automation based in Chicago, IL.
+                                </p>
+                                <p className="mb-4">
+                                    My expertise lies in configuring forms and lists, designing UI policies, managing users and ACLs, and maintaining CMDB data accuracy. I have extensive experience across key ITSM processes including Incident, Problem, Change, and Request Management.
+                                </p>
+                                <p>
+                                    I am proficient at building business rules, client scripts, and service catalog items, with a growing focus on AI-driven features like predictive intelligence. I am eager to leverage my technical skills to deliver efficient, reliable IT operations.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Skills Section */}
+                    <section id="skills" className="py-20 bg-slate-50">
+                        <div className="container mx-auto px-6 max-w-6xl">
+                            <h2 className="text-3xl font-bold text-slate-900 mb-12 text-center">Technical Expertise</h2>
+                            
+                            <div className="grid md:grid-cols-3 gap-8">
+                                {/* Card 1 */}
+                                <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                                    <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center mb-6">
+                                        <Icons.Briefcase />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-900 mb-4">ServiceNow Admin</h3>
+                                    <ul className="space-y-3">
+                                        {['Form & List Configuration', 'User/Role/Group Management', 'ACLs & Security', 'CMDB & Discovery', 'UI Policies & Actions', 'Update Sets'].map((skill, i) => (
+                                            <li key={i} className="flex items-center gap-2 text-slate-600">
+                                                <span className="text-indigo-500"><Icons.CheckCircle /></span> {skill}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                {/* Card 2 */}
+                                <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
+                                        <Icons.Code />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-900 mb-4">Development & Automation</h3>
+                                    <ul className="space-y-3">
+                                        {['Flow Designer', 'Business Rules', 'Client Scripts', 'JavaScript / HTML / CSS', 'REST / SOAP APIs', 'Performance Analytics'].map((skill, i) => (
+                                            <li key={i} className="flex items-center gap-2 text-slate-600">
+                                                <span className="text-blue-500"><Icons.CheckCircle /></span> {skill}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                {/* Card 3 */}
+                                <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+                                    <div className="w-12 h-12 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center mb-6">
+                                        <Icons.GraduationCap />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-900 mb-4">Process & Certs</h3>
+                                    <ul className="space-y-3">
+                                        <li className="flex items-center gap-2 text-slate-600">
+                                            <span className="text-teal-500"><Icons.CheckCircle /></span> Incident / Problem / Change
+                                        </li>
+                                        <li className="flex items-center gap-2 text-slate-600">
+                                            <span className="text-teal-500"><Icons.CheckCircle /></span> Service Catalog Management
+                                        </li>
+                                        <li className="flex items-center gap-2 text-slate-600">
+                                            <span className="text-teal-500"><Icons.CheckCircle /></span> Agile Methodology
+                                        </li>
+                                        <li className="flex items-center gap-2 text-slate-600">
+                                            <span className="text-teal-500"><Icons.CheckCircle /></span> 
+                                            <a href="https://www.credly.com/badges/36b94ae1-da60-43d8-b53d-073ed5101a5b/public_url" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline inline-flex items-center gap-1">
+                                                ServiceNow Certified System Admin <span className="transform scale-75"><Icons.ExternalLink /></span>
+                                            </a>
+                                        </li>
+                                        <li className="flex items-center gap-2 text-slate-600">
+                                            <span className="text-teal-500"><Icons.CheckCircle /></span> Python Programming
+                                        </li>
+                                        <li className="flex items-center gap-2 text-slate-600">
+                                            <span className="text-teal-500"><Icons.CheckCircle /></span> KPI Reporting
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Experience Section */}
+                    <section id="experience" className="py-20 bg-white">
+                        <div className="container mx-auto px-6 max-w-4xl">
+                            <h2 className="text-3xl font-bold text-slate-900 mb-12 flex items-center gap-3">
+                                <span className="p-2 bg-blue-100 text-blue-600 rounded-lg"><Icons.Briefcase /></span>
+                                Work Experience
+                            </h2>
+
+                            <div className="relative border-l-2 border-slate-200 ml-3 space-y-12">
+                                {/* Job 1 */}
+                                <div className="relative pl-8">
+                                    <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-600 border-4 border-white shadow-sm"></div>
+                                    <div className="mb-2">
+                                        <h3 className="text-xl font-bold text-slate-900">ServiceNow Administrator / Pod Lead</h3>
+                                        <div className="text-blue-600 font-medium">Gameopedia Pvt. Ltd. | Hyderabad, India</div>
+                                        <div className="text-slate-400 text-sm">2021 – 2023</div>
+                                    </div>
+                                    <ul className="space-y-2 text-slate-600 mt-4 list-disc list-outside ml-4">
+                                        <li>Led a team of specialists to manage daily admin tasks, ensuring platform stability and meeting SLAs.</li>
+                                        <li>Developed workflows, business rules, and client scripts to automate Incident and Request management.</li>
+                                        <li>Managed user accounts, roles, and ACLs to enforce least-privilege access.</li>
+                                        <li>Facilitated weekly CAB meetings and presented process improvements to stakeholders.</li>
+                                        <li>Performed platform audits to identify configuration issues and ensure CMDB data integrity.</li>
+                                    </ul>
+                                </div>
+
+                                {/* Job 2 */}
+                                <div className="relative pl-8">
+                                    <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-slate-300 border-4 border-white shadow-sm"></div>
+                                    <div className="mb-2">
+                                        <h3 className="text-xl font-bold text-slate-900">ServiceNow Administrator / Data Curation Specialist</h3>
+                                        <div className="text-blue-600 font-medium">Gameopedia Pvt. Ltd. | Hyderabad, India</div>
+                                        <div className="text-slate-400 text-sm">2020 – 2021</div>
+                                    </div>
+                                    <ul className="space-y-2 text-slate-600 mt-4 list-disc list-outside ml-4">
+                                        <li>Managed ServiceNow records across Incident, Request, and Change modules.</li>
+                                        <li>Configured user accounts and role-based access controls (ACLs).</li>
+                                        <li>Created knowledge base articles and gathered requirements for new catalog items.</li>
+                                        <li>Built custom reports and dashboards using Performance Analytics to track KPIs.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Key Projects Section */}
+                    <section id="projects" className="py-20 bg-slate-900 text-white">
+                        <div className="container mx-auto px-6 max-w-6xl">
+                            <h2 className="text-3xl font-bold mb-12 text-center">Key Projects</h2>
+                            <div className="grid md:grid-cols-3 gap-6">
+                                <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+                                    <div className="text-blue-400 mb-4"><Icons.Code /></div>
+                                    <h3 className="text-xl font-bold mb-3">Workflow Automation</h3>
+                                    <p className="text-slate-300">
+                                        Configured Flow Designer workflows to automate incident and request processes, reducing manual handling time by <span className="text-white font-bold">30%</span>.
+                                    </p>
+                                </div>
+                                <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+                                    <div className="text-teal-400 mb-4"><Icons.Database /></div>
+                                    <h3 className="text-xl font-bold mb-3">CMDB Accuracy</h3>
+                                    <p className="text-slate-300">
+                                        Validated CMDB records and ran Discovery scans to identify missing assets, improving overall data accuracy by <span className="text-white font-bold">25%</span>.
+                                    </p>
+                                </div>
+                                <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+                                    <div className="text-indigo-400 mb-4"><Icons.Layout /></div>
+                                    <h3 className="text-xl font-bold mb-3">Service Catalog Adoption</h3>
+                                    <p className="text-slate-300">
+                                        Enhanced Service Catalog items with UI Policies and Client Scripts, resulting in a <span className="text-white font-bold">40%</span> increase in catalog adoption.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Education Section */}
+                    <section className="py-20 bg-slate-50">
+                        <div className="container mx-auto px-6 max-w-4xl">
+                            <h2 className="text-3xl font-bold text-slate-900 mb-8 flex items-center gap-3">
+                                <span className="p-2 bg-blue-100 text-blue-600 rounded-lg"><Icons.GraduationCap /></span>
+                                Education
+                            </h2>
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                                    <div className="text-sm text-blue-600 font-semibold mb-1">2023 – 2025</div>
+                                    <h3 className="text-lg font-bold text-slate-900">Masters in Information Technology</h3>
+                                    <p className="text-slate-600">Indiana Wesleyan University</p>
+                                </div>
+                                <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                                    <div className="text-sm text-blue-600 font-semibold mb-1">2016 – 2020</div>
+                                    <h3 className="text-lg font-bold text-slate-900">Bachelor of Technology (CS)</h3>
+                                    <p className="text-slate-600">St. Martin’s Engineering College</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Contact Section */}
+                    <section id="contact" className="py-20 bg-white">
+                        <div className="container mx-auto px-6 max-w-4xl text-center">
+                            <h2 className="text-3xl font-bold text-slate-900 mb-8">Let's Connect</h2>
+                            <p className="text-slate-600 mb-12 max-w-xl mx-auto">
+                                I am currently based in Chicago, IL and actively looking for opportunities as a ServiceNow Administrator.
+                            </p>
+                            
+                            <div className="flex flex-col md:flex-row justify-center gap-6">
+                                <a href="mailto:sami.sharieff44@gmail.com" className="flex items-center justify-center gap-3 px-6 py-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-blue-300 hover:shadow-md transition group">
+                                    <div className="text-slate-400 group-hover:text-blue-600"><Icons.Mail /></div>
+                                    <div className="text-left">
+                                        <div className="text-xs text-slate-500 uppercase tracking-wide">Email</div>
+                                        <div className="text-slate-900 font-medium">sami.sharieff44@gmail.com</div>
+                                    </div>
+                                </a>
+
+                                <a href="tel:+17734619090" className="flex items-center justify-center gap-3 px-6 py-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-blue-300 hover:shadow-md transition group">
+                                    <div className="text-slate-400 group-hover:text-blue-600"><Icons.Phone /></div>
+                                    <div className="text-left">
+                                        <div className="text-xs text-slate-500 uppercase tracking-wide">Mobile</div>
+                                        <div className="text-slate-900 font-medium">+1 (773) 461-9090</div>
+                                    </div>
+                                </a>
+                                
+                                <a href="https://www.linkedin.com/in/sami-sharieff/" target="_blank" className="flex items-center justify-center gap-3 px-6 py-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-blue-300 hover:shadow-md transition group">
+                                    <div className="text-slate-400 group-hover:text-blue-600"><Icons.Linkedin /></div>
+                                    <div className="text-left">
+                                        <div className="text-xs text-slate-500 uppercase tracking-wide">LinkedIn</div>
+                                        <div className="text-slate-900 font-medium">Connect with me</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+
+                    <footer className="bg-slate-50 py-8 border-t border-slate-200">
+                        <div className="container mx-auto px-6 text-center text-slate-500 text-sm">
+                            &copy; {new Date().getFullYear()} Mohammed Sami Ullah Sharieff. All rights reserved.
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
